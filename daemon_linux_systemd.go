@@ -52,7 +52,7 @@ func (linux *systemDRecord) checkRunning() (string, bool) {
 }
 
 // Install the service
-func (linux *systemDRecord) Install(args ...string) (string, error) {
+func (linux *systemDRecord) Install(exec_path string, args ...string) (string, error) {
 	installAction := "Install " + linux.description + ":"
 
 	if ok, err := checkPrivileges(); !ok {
@@ -71,11 +71,6 @@ func (linux *systemDRecord) Install(args ...string) (string, error) {
 	}
 	defer file.Close()
 
-	execPatch, err := executablePath(linux.name)
-	if err != nil {
-		return installAction + failed, err
-	}
-
 	templ, err := template.New("systemDConfig").Parse(systemDConfig)
 	if err != nil {
 		return installAction + failed, err
@@ -89,7 +84,7 @@ func (linux *systemDRecord) Install(args ...string) (string, error) {
 			linux.name,
 			linux.description,
 			strings.Join(linux.dependencies, " "),
-			execPatch,
+			exec_path,
 			strings.Join(args, " "),
 		},
 	); err != nil {

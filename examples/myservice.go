@@ -9,7 +9,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/takama/daemon"
+	"github.com/kgretzky/daemon"
 )
 
 const (
@@ -42,7 +42,8 @@ func (service *Service) Manage() (string, error) {
 		command := os.Args[1]
 		switch command {
 		case "install":
-			return service.Install()
+			exec_path, _ := daemon.ExecPath()
+			return service.Install(exec_path)
 		case "remove":
 			return service.Remove()
 		case "start":

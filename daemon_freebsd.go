@@ -101,7 +101,7 @@ func (bsd *bsdRecord) checkRunning() (string, bool) {
 }
 
 // Install the service
-func (bsd *bsdRecord) Install(args ...string) (string, error) {
+func (bsd *bsdRecord) Install(exec_path string, args ...string) (string, error) {
 	installAction := "Install " + bsd.description + ":"
 
 	if ok, err := checkPrivileges(); !ok {
@@ -120,11 +120,6 @@ func (bsd *bsdRecord) Install(args ...string) (string, error) {
 	}
 	defer file.Close()
 
-	execPatch, err := executablePath(bsd.name)
-	if err != nil {
-		return installAction + failed, err
-	}
-
 	templ, err := template.New("bsdConfig").Parse(bsdConfig)
 	if err != nil {
 		return installAction + failed, err
@@ -134,7 +129,7 @@ func (bsd *bsdRecord) Install(args ...string) (string, error) {
 		file,
 		&struct {
 			Name, Description, Path, Args string
-		}{bsd.name, bsd.description, execPatch, strings.Join(args, " ")},
+		}{bsd.name, bsd.description, exec_path, strings.Join(args, " ")},
 	); err != nil {
 		return installAction + failed, err
 	}

@@ -63,7 +63,7 @@ func (darwin *darwinRecord) checkRunning() (string, bool) {
 }
 
 // Install the service
-func (darwin *darwinRecord) Install(args ...string) (string, error) {
+func (darwin *darwinRecord) Install(exec_path string, args ...string) (string, error) {
 	installAction := "Install " + darwin.description + ":"
 
 	if ok, err := checkPrivileges(); !ok {
@@ -82,11 +82,6 @@ func (darwin *darwinRecord) Install(args ...string) (string, error) {
 	}
 	defer file.Close()
 
-	execPatch, err := executablePath(darwin.name)
-	if err != nil {
-		return installAction + failed, err
-	}
-
 	templ, err := template.New("propertyList").Parse(propertyList)
 	if err != nil {
 		return installAction + failed, err
@@ -97,7 +92,7 @@ func (darwin *darwinRecord) Install(args ...string) (string, error) {
 		&struct {
 			Name, Path string
 			Args       []string
-		}{darwin.name, execPatch, args},
+		}{darwin.name, exec_path, args},
 	); err != nil {
 		return installAction + failed, err
 	}

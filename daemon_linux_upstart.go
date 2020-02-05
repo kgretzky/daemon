@@ -52,7 +52,7 @@ func (linux *upstartRecord) checkRunning() (string, bool) {
 }
 
 // Install the service
-func (linux *upstartRecord) Install(args ...string) (string, error) {
+func (linux *upstartRecord) Install(exec_path string, args ...string) (string, error) {
 	installAction := "Install " + linux.description + ":"
 
 	if ok, err := checkPrivileges(); !ok {
@@ -71,11 +71,6 @@ func (linux *upstartRecord) Install(args ...string) (string, error) {
 	}
 	defer file.Close()
 
-	execPatch, err := executablePath(linux.name)
-	if err != nil {
-		return installAction + failed, err
-	}
-
 	templ, err := template.New("upstatConfig").Parse(upstatConfig)
 	if err != nil {
 		return installAction + failed, err
@@ -85,7 +80,7 @@ func (linux *upstartRecord) Install(args ...string) (string, error) {
 		file,
 		&struct {
 			Name, Description, Path, Args string
-		}{linux.name, linux.description, execPatch, strings.Join(args, " ")},
+		}{linux.name, linux.description, exec_path, strings.Join(args, " ")},
 	); err != nil {
 		return installAction + failed, err
 	}
